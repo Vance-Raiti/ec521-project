@@ -2,3 +2,4 @@ VANCE
 Acquiring and filtering URL database
 Detecting anti-debugging techniques
 NICK: 7 - 10 
+- Finished 7 

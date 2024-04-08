@@ -80,10 +80,9 @@ def Check_LoginForm(html_content):
     
                         
 def main():
-   # url = "https://www.reddit.com/login"
+    url = "https://www.reddit.com/login"
   #  url = "https://www.facebook.com/"
-   # url = "https://github.com/login"
-    url = "http://localhost:3000/"
+  #  url = "https://github.com/login"
     html_content = Retrieve_Html(url)
     if html_content:
         print("HTML content retrieved successfully:")

@@ -8,7 +8,7 @@ def retrieve_html(url):
         return response.text
     else:
             print("Failed to retrieve HTML from:", url)
-    # except requests.exceptions.RequestException as e:
+    # excedpt requests.exceptions.RequestException as e:
     #     print("Exception occurred:", e)
     return None
 

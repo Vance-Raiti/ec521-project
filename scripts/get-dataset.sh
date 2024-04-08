@@ -7,3 +7,5 @@ fi
 ./filter-dataset.py 2>/dev/null
 
 cat urls/header.txt urls/urls*.txt > urls.txt
+
+./sort-dataset.py

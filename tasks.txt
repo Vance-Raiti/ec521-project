@@ -5,3 +5,5 @@ NICK: 7 - 10
 - Finished 7 
 -90% Done with 8
 -90% done with 9 need to check some things.
+-90% FInished with 10. 
+TO DO Need to review all I did and make sure it all works and is correct then I can talk to team about it. 

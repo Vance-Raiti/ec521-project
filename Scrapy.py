@@ -50,6 +50,7 @@ def Check_BadActionFields(html_content, webpage_url):
                 
                 print("Cross-domain scripting detected:", action_url)
 def Check_NonMatchingURLs(html_content, webpage_url):
+    #This is Number 9 
     soup = BeautifulSoup(html_content, 'html.parser')
     links = soup.find_all('a')
     domain_counts = {}
@@ -80,8 +81,32 @@ def Check_NonMatchingURLs(html_content, webpage_url):
     empty_links_percentage = empty_links_count / total_links
     if empty_links_percentage > empty_links_threshold:
         print("Empty or ill-formed links detected:", empty_links_percentage)
-
-        
+def Check_OutOfPositionBrandName(html_content, webpage_url):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    links = soup.find_all('a')
+    domain_counts = {}
+    for link in links:
+        href = link.get('href')
+        if href:
+            parsed_href = urlparse(href)
+            domain = parsed_href.netloc
+            if domain:
+                domain_counts[domain] = domain_counts.get(domain, 0) + 1
+    print(domain_counts)
+    if domain_counts:
+        most_common_domain = max(domain_counts, key=domain_counts.get)
+        print(most_common_domain,urlparse(webpage_url).netloc)
+        if most_common_domain != urlparse(webpage_url).netloc:
+            # Remove the page domain keyword and the string to its right from the URL
+            page_domain_keyword = urlparse(webpage_url).netloc.split('.')[0]
+            url_without_domain = webpage_url.replace(page_domain_keyword, '')
+            # Search for the brand name in the remaining portion of the URL
+            brand_name = urlparse(webpage_url).netloc.replace('.' + page_domain_keyword, '')
+            if brand_name in url_without_domain:
+                print("Suspicious out-of-position brand name detected:", brand_name)
+                # Set feature value to 1
+                return 
+    return 
 def Check_LoginForm(html_content):
     # This form will Check if there is a login form through four methods:
     # 1) It will find if there a form tag
@@ -147,7 +172,8 @@ def main():
         print("HTML content retrieved successfully:")
       #  Check_LoginForm(html_content)
        # Check_BadActionFields(html_content, url)
-        Check_NonMatchingURLs(html_content,url)
+      #  Check_NonMatchingURLs(html_content,url)
+        Check_OutOfPositionBrandName(html_content, url)
     else:
         print("Failed to retrieve HTML content.")
 

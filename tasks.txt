@@ -1,6 +1,9 @@
-VANCE
-Acquiring and filtering URL database
-Detecting anti-debugging techniques
+VANCE:
+Features 1-6
+(DONE) Acquiring and filtering URL database
+(DONE) Detecting excessive breakpoint triggers
+
+
 NICK: 7 - 10 
 - Finished 7 
 -90% Done with 8

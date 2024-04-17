@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+from tldextract import extract
 
 login_keywords = [
     "password", "username", "email", "login", "sign in", "log in", "sign up", "register", 
@@ -46,41 +47,45 @@ def Check_BadActionFields(html_content, webpage_url):
             #or action_url.startswith('/') or action_url.startswith('http'):
             #Need to fix it where it Potental bad action field. 
             print("Potential bad action field detected:", action_url)
-            if webpage_url and urlparse(action_url).netloc != urlparse(webpage_url).netloc:
+            return 1
+        if webpage_url and urlparse(action_url).netloc != urlparse(webpage_url).netloc:
                 
-                print("Cross-domain scripting detected:", action_url)
+            print("Cross-domain scripting detected:", action_url)
+            return 1
 def Check_NonMatchingURLs(html_content, webpage_url):
-    #This is Number 9 
     soup = BeautifulSoup(html_content, 'html.parser')
     links = soup.find_all('a')
     domain_counts = {}
     total_links = len(links)
     similar_links_threshold = 0.5  # Define a threshold for determining highly similar links
     empty_links_threshold = 0.1
-    print(total_links,"Total Links")
+
     for link in links:
         href = link.get('href')
         if href:
             parsed_href = urlparse(href)
-            domain = parsed_href.netloc
+            domain = extract(parsed_href.netloc).registered_domain
             if domain:
                 domain_counts[domain] = domain_counts.get(domain, 0) + 1
-        print(parsed_href,domain, domain_counts)
-    print(domain_counts)
+
     if domain_counts:
+        print(domain_counts)
         most_common_domain = max(domain_counts, key=domain_counts.get)
-        print(most_common_domain,urlparse(webpage_url).netloc, "ENDED")
-        if most_common_domain != urlparse(webpage_url).netloc:
+        if most_common_domain != extract(urlparse(webpage_url).netloc).registered_domain:
             print("Most frequent domain doesn't match page domain.")
             print("Most frequent domain:", most_common_domain)
-        similar_links_count = sum(count for count in domain_counts.values() if count > 1)
+            return 1
+    similar_links_count = sum(count for count in domain_counts.values() if count > 1)
     similar_links_percentage = similar_links_count / total_links
     if similar_links_percentage > similar_links_threshold:
         print("Highly similar links detected:", similar_links_percentage)
+        return 1
     empty_links_count = sum(1 for link in links if not link.get('href'))
     empty_links_percentage = empty_links_count / total_links
     if empty_links_percentage > empty_links_threshold:
         print("Empty or ill-formed links detected:", empty_links_percentage)
+        return 1
+    return 0
 def Check_OutOfPositionBrandName(html_content, webpage_url):
     soup = BeautifulSoup(html_content, 'html.parser')
     links = soup.find_all('a')
@@ -97,16 +102,18 @@ def Check_OutOfPositionBrandName(html_content, webpage_url):
         most_common_domain = max(domain_counts, key=domain_counts.get)
         print(most_common_domain,urlparse(webpage_url).netloc)
         if most_common_domain != urlparse(webpage_url).netloc:
-            # Remove the page domain keyword and the string to its right from the URL
-            page_domain_keyword = urlparse(webpage_url).netloc.split('.')[0]
-            url_without_domain = webpage_url.replace(page_domain_keyword, '')
-            # Search for the brand name in the remaining portion of the URL
-            brand_name = urlparse(webpage_url).netloc.replace('.' + page_domain_keyword, '')
-            if brand_name in url_without_domain:
+            # Extract brand name more accurately
+            url_components = urlparse(webpage_url)
+            brand_name = url_components.netloc.split('.')[0]  # Extract brand name from the first part of the domain
+            brand_name = brand_name.lower()  # Convert to lowercase for case-insensitive comparison
+            remaining_url = url_components.path + url_components.query  # Combine path and query for comparison
+            remaining_url = remaining_url.lower()  # Convert to lowercase for case-insensitive comparison
+            print(brand_name, remaining_url)
+            if brand_name in remaining_url:
                 print("Suspicious out-of-position brand name detected:", brand_name)
-                # Set feature value to 1
-                return 
-    return 
+                return 1
+    return 0
+
 def Check_LoginForm(html_content):
     # This form will Check if there is a login form through four methods:
     # 1) It will find if there a form tag
@@ -146,8 +153,10 @@ def Check_LoginForm(html_content):
         print(CheckConditions)
         if all(CheckConditions):
             print("Website Contains a Login form with a URL/ActionURl that is not HTTPS")
+            return 1
         elif CheckConditions == [True,False,True,True]:
-            print("Website Contains a Login form the URL/ActionURL is HTTPS") 
+            print("Website Contains a Login form the URL/ActionURL is HTTPS")
+            return 0 
         else:
             print("Not all conditions are true")
 
@@ -165,14 +174,22 @@ def main():
   #  url = "https://www.reddit.com/login"
   #  url = "https://www.facebook.com/"
    # url = "https://www.linkedin.com/login"
-    url = "https://github.com/login"
-   # url = "https://github.com/chathurangasineth/Phishing/blob/master/login.html"
+  #  url = "https://github.com/login"
+    url = "https://github.com/chathurangasineth/Phishing/blob/master/login.html"
     html_content = Retrieve_Html(url)
+    urls = ["https://github.com/login","https://www.linkedin.com/login","https://www.facebook.com/"]
+    for url1 in urls:
+        print(url1)
+        content = Retrieve_Html(url1)
+        Check_LoginForm(content)
+        Check_BadActionFields(content, url1)
+        Check_NonMatchingURLs(content,url1)
+        Check_OutOfPositionBrandName(content, url1)
     if html_content:
         print("HTML content retrieved successfully:")
       #  Check_LoginForm(html_content)
        # Check_BadActionFields(html_content, url)
-      #  Check_NonMatchingURLs(html_content,url)
+    #    Check_NonMatchingURLs(html_content,url)
         Check_OutOfPositionBrandName(html_content, url)
     else:
         print("Failed to retrieve HTML content.")

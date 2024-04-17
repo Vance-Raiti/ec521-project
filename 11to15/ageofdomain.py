@@ -1,7 +1,7 @@
 import whois
 from datetime import datetime
 
-def ageofdomain(http,url):
+def ageofdomain(html,url):
     try:
         domain_info = whois.whois(url)
         creation_date = domain_info.creation_date

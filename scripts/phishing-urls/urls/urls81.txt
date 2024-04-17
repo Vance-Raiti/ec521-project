@@ -1,2 +1,0 @@
-8524344,https://attloginscreen.wixsite.com/att-yahoo,http://www.phishtank.com/phish_detail.php?phish_id=8524344,2024-04-06T11:57:02+00:00,yes,2024-04-06T12:03:32+00:00,yes,AT&amp;T
-8523955,https://cloudflare-ipfs.com/ipfs/bafybeicn6nz52o3pnug3o5xud2xeznmyvelmeewxs7lad2fiku6njqft6e,http://www.phishtank.com/phish_detail.php?phish_id=8523955,2024-04-05T23:59:44+00:00,yes,2024-04-06T00:10:47+00:00,yes,Other

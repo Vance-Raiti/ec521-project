@@ -1,0 +1,2 @@
+8524246,https://yxf.hgn.mybluehost.me/pass/dashboard,http://www.phishtank.com/phish_detail.php?phish_id=8524246,2024-04-06T06:32:54+00:00,yes,2024-04-06T06:52:47+00:00,yes,Other
+8523982,https://cpanel12wh.bkk1.cloud.z.com/~cp318430/app/browser/info/vbv2.php,http://www.phishtank.com/phish_detail.php?phish_id=8523982,2024-04-06T00:03:15+00:00,yes,2024-04-06T00:10:47+00:00,yes,Other

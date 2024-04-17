@@ -1,2 +1,0 @@
-8524350,https://www.piccolocorolagoccia.it/allmpa.html,http://www.phishtank.com/phish_detail.php?phish_id=8524350,2024-04-06T11:59:35+00:00,yes,2024-04-06T12:03:32+00:00,yes,Other
-8523963,https://qrco.de/beCsasdiviuscoascxvq,http://www.phishtank.com/phish_detail.php?phish_id=8523963,2024-04-06T00:00:34+00:00,yes,2024-04-06T00:10:47+00:00,yes,Other

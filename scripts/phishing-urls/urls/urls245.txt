@@ -1,2 +1,0 @@
-8524072,https://pub-3e997df5ecf140d7b4f10a4814076f8c.r2.dev/index.html,http://www.phishtank.com/phish_detail.php?phish_id=8524072,2024-04-06T01:14:05+00:00,yes,2024-04-06T01:43:07+00:00,yes,Other
-8523972,https://microsftstorages.blob.core.windows.net/soft/index.html,http://www.phishtank.com/phish_detail.php?phish_id=8523972,2024-04-06T00:02:02+00:00,yes,2024-04-06T00:10:47+00:00,yes,Other

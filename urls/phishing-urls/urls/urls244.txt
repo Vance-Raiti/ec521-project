@@ -1,2 +1,0 @@
-8524073,https://pub-67efae20d3ea4244874bd55b11e9a948.r2.dev/download.html,http://www.phishtank.com/phish_detail.php?phish_id=8524073,2024-04-06T01:14:15+00:00,yes,2024-04-06T01:43:07+00:00,yes,Other
-8523979,https://bog.ulj.temporary.site/usa/Myaccount/,http://www.phishtank.com/phish_detail.php?phish_id=8523979,2024-04-06T00:02:51+00:00,yes,2024-04-06T00:10:47+00:00,yes,Other

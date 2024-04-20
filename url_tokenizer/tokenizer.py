@@ -6,4 +6,6 @@ import torch
 
 tokenizer = Tokenizer.from_file("url-tokenizer.json")
 
-with open(
+print(
+	tokenizer.encode("google com hello world").ids
+)

@@ -1,5 +1,5 @@
 import re
-import parse
+from parse import parse
 
 s = r"[\d\w]{2,}"
 embedded_domain = re.compile(
@@ -23,13 +23,13 @@ top_level_domains = [
 ]
 
 def get_features(html,url):
-	protocol, domain, path = parse("{}://{}/{}")
+	protocol, domain, path = parse("{}://{}/{}",url)
 
 	features = []
 
 	# does this url contain something that looks like a domain in the path?
 	features.append(
-		1 if embedded_domains.match(path) is not None else 0
+		1 if embedded_domain.match(path) is not None else 0
 	)
 
 	# does this url con
@@ -59,3 +59,5 @@ def get_features(html,url):
 			segment in top_level_domains for segment in url.split('.')[3:]
 		]) else 0
 	)
+	
+	return features

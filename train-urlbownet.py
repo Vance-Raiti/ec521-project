@@ -7,7 +7,7 @@ N_EPOCHS = 10
 data = UrlDataset()
 net = UrlBOWNet()
 bce = torch.nn.BCELoss()
-optimizer = torch.optim.SGD(y_hat.params())
+optimizer = torch.optim.SGD(net.params())
 
 for _ in range(N_EPOCHS):
 	for url,label in dataset:

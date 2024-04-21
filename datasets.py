@@ -6,9 +6,8 @@ from random import shuffle
 import requests
 import numpy
 from urltokenizer import UrlTokenizer
-
 import url_features
-
+from Scrapy import Retrieve_Html, Check_BadActionFields, Check_NonMatchingURLs, Check_OutOfPositionBrandName, Check_LoginForm
 
 this = dirname(__file__)
 

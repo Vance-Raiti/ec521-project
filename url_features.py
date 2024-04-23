@@ -23,7 +23,14 @@ top_level_domains = [
 ]
 
 def get_features(html,url):
-	protocol, domain, path = parse("{}://{}/{}",url)
+	print(url)
+	protocol, domain = parse("{}://{}",url)
+	if domain[-1] == "/":
+		domain = domain[:-1]
+	if "/" in domain:
+		domain,path = parse("{}/{}",domain)
+	else:
+		path = ""
 
 	features = []
 

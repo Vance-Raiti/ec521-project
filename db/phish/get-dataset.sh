@@ -5,8 +5,5 @@ if [ ! -f online-valid.csv ]; then
 	gzip -d online-valid.csv.gz
 fi
 
-python filter-dataset.py
-cat urls/header.txt urls/urls*.txt > urls.txt
-python format-dataset.py
+python crawler.py
 
-cp phish-urls.txt ..

@@ -5,11 +5,11 @@ class MultiLayerPerceptron(torch.nn.Module):
 		super().__init__()
 		self.layers = torch.nn.Sequential(*[
 			torch.nn.Linear(in_features,width),
-			torch.nn.Sigmoid(),
+			torch.nn.ReLU(),
 			torch.nn.Sequential(*[
 					torch.nn.Sequential(*[
 						torch.nn.Linear(width,width),
-						torch.nn.Sigmoid(),
+						torch.nn.ReLU(),
 					])
 					for _ in range(depth)
 			]),

@@ -1,6 +1,9 @@
 import re
 from parse import parse
 
+from url_token_clf import UrlTokenClassifier
+token_classifier = UrlTokenClassifier()
+
 s = r"[\d\w]{2,}"
 embedded_domain = re.compile(
 	f"{s}\.{s}\.{s}"
@@ -23,7 +26,7 @@ top_level_domains = [
 ]
 
 def get_features(html,url):
-	print(url)
+	
 	protocol, domain = parse("{}://{}",url)
 	if domain[-1] == "/":
 		domain = domain[:-1]
@@ -58,7 +61,7 @@ def get_features(html,url):
 	)
 
 	features.append(
-		0
+		token_classifier(url)
 	)
 	
 	features.append(

@@ -24,7 +24,7 @@ def verify_urls_(qin,qout):
 			exit()
 		n = qin.qsize()
 		try:
-			html = requests.get(url,headers=headers,timeout=10).text
+			html = requests.get(url,headers=headers,timeout=5).text
 			print(f'{n:5} SUCCESS {url}')
 		except requests.exceptions.RequestException:
 			html = None

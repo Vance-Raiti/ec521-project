@@ -10,7 +10,7 @@ from parse import parse
 
 
 NUM_WORKERS = 256
-TARGET_SIZE = 100000
+TARGET_SIZE = 20000
 Q_MAXSIZE = 2**14
 
 if len(sys.argv) > 1:

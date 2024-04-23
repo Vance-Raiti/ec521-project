@@ -1,6 +1,6 @@
 import torch
 
-from webfeaturesdataset import WebFeaturesDataset
+from datasets import WebFeaturesDataset
 from model import MultiLayerPerceptron
 from torch.optim.lr_scheduler import LambdaLR
 import url_features

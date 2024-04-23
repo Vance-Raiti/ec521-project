@@ -3,6 +3,7 @@ from torch.utils.data import IterableDataset
 import os
 from os.path import dirname,join,exists
 from random import shuffle
+import random
 import requests
 import numpy
 from Scrapy import Retrieve_Html, Check_BadActionFields, Check_NonMatchingURLs, Check_OutOfPositionBrandName, Check_LoginForm
@@ -10,6 +11,10 @@ from Scrapy import Retrieve_Html, Check_BadActionFields, Check_NonMatchingURLs, 
 this = dirname(__file__)
 
 EPS = 1e-5
+
+# to ensure there's never any cross-contamination between train and valid on instantiations of GenericDataset
+random.seed(0) 
+
 
 DEFAULT_LEGITIMATE = join(this,'db/legit')
 DEFAULT_PHISH = join(this,'db/phish')
@@ -90,22 +95,18 @@ class GenericDataset(IterableDataset):
 class WebFeaturesDataset(GenericDataset):
 	def __iter__(self):
 		for d in self.data:
-			if d['url'] == '':
+			if d['url'] == '' or 'label' not in d:
 				continue
 
+			html = self.retrieve(d)
 			features = []
 			for fn in self.feature_functions:
 				features += fn(html,d['url'])
+			
 			try:
 				yield torch.tensor(features,dtype=torch.float), torch.tensor([d['label']],dtype=torch.float)
 			except KeyError:
 				continue
-
-			try:
-				yield self.retrieve(d)
-			except (ValueError, KeyError):
-				continue
-
 
 	
 class UrlDataset(GenericDataset):

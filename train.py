@@ -4,13 +4,15 @@ from datasets import WebFeaturesDataset
 from model import MultiLayerPerceptron
 from torch.optim.lr_scheduler import LambdaLR
 import url_features
+from Scrapy import main
 
 N_EPOCHS = 3
 EPS = 1e-7
 
 
 feature_functions = [
-	url_features.get_features
+	url_features.get_features,
+	main
 ]
 
 data = WebFeaturesDataset(feature_functions=feature_functions)

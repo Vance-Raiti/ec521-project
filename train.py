@@ -4,7 +4,7 @@ from datasets import WebFeaturesDataset
 from model import MultiLayerPerceptron
 from torch.optim.lr_scheduler import LambdaLR
 import url_features
-from Scrapy import main
+from pt2 import main
 
 N_EPOCHS = 3
 EPS = 1e-7
@@ -69,6 +69,7 @@ for epoch in range(N_EPOCHS):
 		pred_phish = y_hat.item() > 0.5
 		is_phish = y.item() > 0.5
 		print(f"Epoch {epoch}, it {i} of {len(data)}")
+		print(f"predictied {round(y_hat.item(),2)} (actual {round(y.item())})")
 		evaluator.update(pred_phish,is_phish)
 	
 	with torch.no_grad():

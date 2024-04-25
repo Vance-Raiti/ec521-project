@@ -23,8 +23,33 @@ def retrieve_html(url):
     else:
         print("Failed to retrieve HTML from:", url)
         return None
+    
+def get_page_rank(domains):
+    api_key = 'oc800w8s4444sw4gwkgos0go8k4kwo88ksskg0k0'
 
+    url = 'https://openpagerank.com/api/v1.0/getPageRank'
+    headers = {'API-OPR': api_key}
+    params = {'domains[]': domains}
+    
+    response = requests.get(url, headers=headers, params=params)
+    
+    if response.status_code == 200:
+        data = response.json()
+        print(data)
+
+        if 'response' in data:
+            page_ranks = []
+            for item in data['response']:
+                domain = item['domain']
+                page_rank_integer = item['page_rank_integer']
+                if page_rank_integer == '':
+                    return 1
+                elif 'error' in item and item['error'] != '':
+                    return 1
+    return 0
 def main(html, url, k=5):
+    #12 and 13
+    TArray = []
     webpage_text = extract_text_from_webpage(html)
     tfidf_vectorizer = TfidfVectorizer()
     tfidf_matrix = tfidf_vectorizer.fit_transform([webpage_text])
@@ -32,19 +57,32 @@ def main(html, url, k=5):
     feature_names = tfidf_vectorizer.get_feature_names_out()
     top_k_words = extract_top_k_words(tfidf_scores, k, feature_names)
     
-    # Extract domain keyword from URL
     domain = extract(url).domain
     
-    # Form search query including top words and domain keyword
     query = " ".join(word for word, _ in top_k_words)
     query += f" {domain}"
     
-    # Perform search using DuckDuckGo
     results = DDGS().text(query, max_results=30)
-    return results
+    
+    original_domain = extract(url).registered_domain
+    Number11 = 1
+    for result in results:
+        result_domain = extract(result['href']).registered_domain
+        if result_domain == original_domain:
+            Number11 = 0
+            break
+    TArray.append(Number11)
+    domain = extract(url).registered_domain
+    domains = [domain]
+    TArray.append(get_page_rank(domains))
+    return TArray
+
 
 # Example usage
 html = retrieve_html("https://www.reddit.com/login")
 url = "https://www.reddit.com/login"
 search_results = main(html, url)
+# domain = extract(url).registered_domain
+# page_ranks = get_page_rank(domains, api_key)
+# print(page_ranks)
 print(search_results)

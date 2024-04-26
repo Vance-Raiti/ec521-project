@@ -6,6 +6,7 @@ from random import shuffle
 import random
 import requests
 import numpy
+from html2text import html2text
 
 this = dirname(__file__)
 
@@ -119,3 +120,17 @@ class UrlDataset(GenericDataset):
 				yield d['url'],d['label']
 			except KeyError:
 				continue
+
+class HtmlDataset(GenericDataset):
+	def __iter__(self):
+		
+		for i,d in enumerate(self.data):
+			if self.length is not None and i > self.length:
+				break
+			try:
+				html = self.retrieve(d)
+			except (KeyError, ValueError):
+				continue
+			text = html2text(html)
+			text = str(text.encode('ascii','ignore'))
+			yield text	

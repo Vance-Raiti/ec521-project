@@ -9,38 +9,38 @@ from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import Whitespace
 from parse import parse
 
-from bs4 import BeautifulSoup as bs
+from datasets import HtmlDataset
 
-VOCAB_SIZE = 200
+from html2text import html2text
 
-class UrlTokenClassifier:
+VOCAB_SIZE = 2000
+
+class HtmlTokenizer:
 	def __init__(self):
 		if not exists('html-tokenizer.json'):
 			self.train_tokenizer()	
 		self.tokenizer = Tokenizer.from_file('html-tokenizer.json')
 
 	def train_tokenizer(self):
-		htmls = [html for html,label in HtmlDataset()]
+		html = HtmlDataset(length = 7000)
 		tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
 		tokenizer.pre_tokenizer = Whitespace()
 		trainer = BpeTrainer(vocab_size=VOCAB_SIZE,special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"])
-		tokenizer.train_from_iterator(htmls,trainer)
+		tokenizer.train_from_iterator(html,trainer)
 		tokenizer.save("html-tokenizer.json")
 
-	def encode(self,string):
-		string = string.split(":")
-		string = string[1]
-		string = string.replace("/"," ")
-		ids = self.tokenizer.encode(string).ids
-		x = numpy.zeros((1,VOCAB_SIZE))
+	def encode(self,html):
+		text = html2text(html)
+		text = str(text.encode('ascii','ignore'))
+		ids = self.tokenizer.encode(html).ids
+		x = [0 for _ in range(VOCAB_SIZE)]
 		for i in ids:
-			x[0,i] = 1
+			x[i] = 1
 		return x
 	
-	def __call__(self,string):
-		x = self.encode(string)
-		y_hat = self.classifier.predict(x)
-		return y_hat
+	def __call__(self, html, url):
+		x = self.encode(html)
+		return x
 
 if __name__ == "__main__":
-	UrlTokenClassifier()
+	HtmlTokenizer()

@@ -2,16 +2,17 @@ import torch
 
 from datasets import WebFeaturesDataset
 from model import MultiLayerPerceptron
-from torch.optim.lr_scheduler import LambdaLR
 import url_features
+from html_tokenizer import HtmlTokenizer
 
 N_EPOCHS = 3
 EPS = 1e-7
 
+html_tokenizer = HtmlTokenizer()
 
 feature_functions = [
 	url_features.get_features,
-	main
+	html_tokenizer,
 ]
 
 data = WebFeaturesDataset(feature_functions=feature_functions)

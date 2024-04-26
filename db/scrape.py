@@ -12,7 +12,6 @@ PHISH = 1
 DEBUG = False
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
-
 html_cache = open("html_cache.txt","a")
 html_cache_table = open("html_cache_table.csv","a")
 DuckDuckGo_cache = open("DuckDuckGo_cache.txt","a")
@@ -77,10 +76,10 @@ def scrape_(qin,qout):
 		except requests.exceptions.RequestException:
 			html = None
 			debug(f'FAILED  {url}')
-		qout.put((url,html))
+		qout.put((url,html,pagerank,ducksearch))
 
 def accept(qout,label):
-	url, html = qout.get()
+	url, html,pagerank,ducksearch = qout.get()
 	if html is None:
 		return url, html
 	offset = html_cache.tell()

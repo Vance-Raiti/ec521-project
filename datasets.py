@@ -19,6 +19,7 @@ random.seed(0)
 DEFAULT_LEGITIMATE = join(this,'db/legit')
 DEFAULT_PHISH = join(this,'db/phish')
 i = 0
+
 class GenericDataset(IterableDataset):
 	def __init__(
 			self,
@@ -37,25 +38,25 @@ class GenericDataset(IterableDataset):
 			row = row.strip().split(',') + [label]
 			labels = ['url','offset','len','label']
 			types = [str,int,int,float]
-			try:
-				return {k:t(v) for k,v,t in zip(labels,row,types)}
-			except ValueError:
+			if len(row) != len(labels):
 				return None
-		
+			d = {k:t(v) for k,v,t in zip(labels,row,types)}
+			if len(d['url']) == 0:
+				return None
+			return d
+		PHISH = 1
+		LEGIT = 0	
 		if use_eps:
-			POS = 1-EPS
-			NEG = 0+EPS
-		else:
-			POS = 1
-			NEG = 0 
+			PHISH -= EPS
+			LEGIT += EPS
 
 		legit = [
-			parse_row(row,NEG)
+			parse_row(row,LEGIT)
 			for row in open(html_cache_table_of(legit_path))
 		]
 		self.legit_cache = open(html_cache_of(legit_path))
 		phish = [
-			parse_row(row,POS)
+			parse_row(row,PHISH)
 			for row in open(html_cache_table_of(phish_path))
 		]
 		self.phish_cache = open(html_cache_of(phish_path))
@@ -76,6 +77,9 @@ class GenericDataset(IterableDataset):
 	def valid(self):
 		self.data = self.valid_data
 
+	def train_and_valid(self):
+		self.data = self.train_data + self.valid_data
+
 	def retrieve(self,d):
 		if d['label'] > 0.5:
 			fp = self.phish_cache
@@ -88,9 +92,14 @@ class GenericDataset(IterableDataset):
 	def __len__(self):
 		return len(self.data)
 
-
-
-
+	def __getitem__(self,idx):
+		d = self.data[idx]
+		d['html'] = self.retrieve(d)
+		return d
+	
+	def __iter__(self):
+		for i in range(len(self)):
+			yield self[i]
 
 class WebFeaturesDataset(GenericDataset):
 	def __iter__(self):

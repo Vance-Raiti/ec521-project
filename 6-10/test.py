@@ -35,7 +35,7 @@ def get_page_rank(domains):
     
     if response.status_code == 200:
         data = response.json()
-        print(data)
+        print(data,"THIS IS DATA FROM PAGE RANK")
 
         if 'response' in data:
             page_ranks = []
@@ -47,7 +47,8 @@ def get_page_rank(domains):
                 elif 'error' in item and item['error'] != '':
                     return 1
     return 0
-def main(html, url, k=5):
+def main(html, url):
+    k=5
     #12 and 13
     TArray = []
     webpage_text = extract_text_from_webpage(html)
@@ -63,7 +64,7 @@ def main(html, url, k=5):
     query += f" {domain}"
     
     results = DDGS().text(query, max_results=30)
-    
+    print(results,"THIS IS THE RESULT")
     original_domain = extract(url).registered_domain
     Number11 = 1
     for result in results:

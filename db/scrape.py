@@ -41,3 +41,10 @@ def accept(qout,label):
 	print(html,file=html_cache)
 	print(f"{url},{offset},{len(html)},{label}",file=html_cache_table)
 	return url, html
+
+def retrieve(row):
+	row = row.strip().split(',')
+	url, offset, length, label = row[0], int(row[1]), int(row[2]), int(row[3])
+	html_cache.seek(offset)
+	html = html_cache.read(length)
+	return url, html, lable

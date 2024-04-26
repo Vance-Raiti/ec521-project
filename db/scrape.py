@@ -19,7 +19,7 @@ DuckDuckGo_cache_table = open("DuckDuckGo_cache_table.csv","a")
 PageRank_cache = open("PageRank_cache.txt","a")
 PageRank_cache_table = open("PageRank_cache_table.csv","a")
 def get_page_rank(domains):
-	api_key = 'oc800w8s4444sw4gwkgos0go8k4kwo88ksskg0k0'
+	api_key = ''
 	url = 'https://openpagerank.com/api/v1.0/getPageRank'
 	headers = {'API-OPR': api_key}
 	params = {'domains[]': domains}

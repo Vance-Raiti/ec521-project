@@ -4,7 +4,6 @@ from datasets import WebFeaturesDataset
 from model import MultiLayerPerceptron
 from torch.optim.lr_scheduler import LambdaLR
 import url_features
-from pt2 import main
 
 N_EPOCHS = 3
 EPS = 1e-7

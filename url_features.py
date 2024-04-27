@@ -26,7 +26,6 @@ top_level_domains = [
 ]
 
 def get_features(html,url):
-	
 	protocol, domain = parse("{}://{}",url)
 	if domain[-1] == "/":
 		domain = domain[:-1]
@@ -69,5 +68,4 @@ def get_features(html,url):
 			segment in top_level_domains for segment in url.split('.')[3:]
 		]) else 0
 	)
-	
 	return features

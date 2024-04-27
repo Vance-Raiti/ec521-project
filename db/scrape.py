@@ -12,12 +12,10 @@ PHISH = 1
 DEBUG = False
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+
 html_cache = open("html_cache.txt","a")
 html_cache_table = open("html_cache_table.csv","a")
-DuckDuckGo_cache = open("DuckDuckGo_cache.txt","a")
-DuckDuckGo_cache_table = open("DuckDuckGo_cache_table.csv","a")
-PageRank_cache = open("PageRank_cache.txt","a")
-PageRank_cache_table = open("PageRank_cache_table.csv","a")
+
 def get_page_rank(domains):
 	api_key = ''
 	url = 'https://openpagerank.com/api/v1.0/getPageRank'
@@ -47,10 +45,12 @@ def ResultsFromDuckDuckGo(html,url):
 	query += f" {domain}"
 	results = DDGS().text(query, max_results=30)
 	return results
+
 def extract_top_k_words(tfidf_scores, k, feature_names):
     word_scores = list(zip(feature_names, tfidf_scores))
     sorted_words = sorted(word_scores, key=lambda x: x[1], reverse=True)
     return sorted_words[:k]
+
 def debug(*args,**kwargs):
 	if DEBUG:
 		print(*args,**kwargs)
@@ -68,18 +68,20 @@ def scrape_(qin,qout):
 			exit()
 		try:
 			html = requests.get(url,headers=headers,timeout=5).text
-			domain = extract(url).registered_domain
-			domains = [domain]
-			pagerank = get_page_rank(domains)
-			ducksearch = ResultsFromDuckDuckGo(html,url)
+			#domain = extract(url).registered_domain
+			#domains = [domain]
+			#pagerank = get_page_rank(domains)
+			#ducksearch = ResultsFromDuckDuckGo(html,url)
 			debug(f'SUCCESS {url}')
 		except requests.exceptions.RequestException:
 			html = None
 			debug(f'FAILED  {url}')
-		qout.put((url,html,pagerank,ducksearch))
+		qout.put((url,html))
+		#qout.put((url,html,pagerank,ducksearch))
 
 def accept(qout,label):
-	url, html,pagerank,ducksearch = qout.get()
+	url,html = qout.get()
+	#url, html,pagerank,ducksearch = qout.get()
 	if html is None:
 		return url, html
 	offset = html_cache.tell()
@@ -87,6 +89,7 @@ def accept(qout,label):
 	
 	print(f"{url},{offset},{len(html)},{label}",file=html_cache_table)
 	return url, html
+
 def retrieve(row):
 	row = row.strip().split(',')
 	url, offset, length, label = row[0], int(row[1]), int(row[2]), int(row[3])

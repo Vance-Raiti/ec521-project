@@ -71,7 +71,7 @@ class UrlTokenClassifier:
 	
 	def __call__(self,string):
 		x = self.encode(string)
-		y_hat = self.classifier.predict(x)
+		y_hat = self.classifier.predict(x)[0]
 		return y_hat
 
 if __name__ == "__main__":

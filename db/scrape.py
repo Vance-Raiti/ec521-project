@@ -1,5 +1,5 @@
 import requests
-from duckduckgo_search import DDGS
+from duckduckgo_search import AsyncDDGS as DDGS
 from sklearn.feature_extraction.text import TfidfVectorizer
 from bs4 import BeautifulSoup
 import requests
@@ -9,10 +9,12 @@ from tldextract import extract
 import whois
 from datetime import datetime
 
+from ddgs import ddgs_test
+
 LEGIT = 0
 PHISH = 1
 
-DEBUG = False
+DEBUG = True
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
@@ -50,7 +52,7 @@ def ResultsFromDuckDuckGo(html,url):
 	domain = extract(url).domain
 	query = " ".join(word for word, _ in top_k_words)
 	query += f" {domain}"
-	results = DDGS().text(query, max_results=30)
+	results = DDGS().text(query,max_results=30)
 	return results
 
 def extract_top_k_words(tfidf_scores, k, feature_names):
@@ -85,7 +87,8 @@ def scrape(*args,**kwargs):
 		pass
 
 def scrape_(qin,qout):
-	while qin.qsize():
+	while qin.qsize():	
+		results = ddgs_test()
 		url = qin.get()
 		if url == "END":
 			exit()
@@ -94,11 +97,12 @@ def scrape_(qin,qout):
 			domain = extract(url).registered_domain
 			domains = [domain]
 			pagerank = get_page_rank(domains)
-			ducksearch = ResultsFromDuckDuckGo(html,url)
 			debug(f'SUCCESS {url}')
 		except requests.exceptions.RequestException:
 			html = None
+			pagerank = None
 			debug(f'FAILED  {url}')
+		print('done')
 		qout.put((url,html))
 		qout.put((url,html,pagerank,ducksearch))
 

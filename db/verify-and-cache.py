@@ -61,7 +61,7 @@ while exists(save_path(i)):
 scraped = open(save_path(i),'w')
 
 for i in range(len(urls)):
-	url, html, _, __ = accept(qout,label)
+	url, html, _, _ = accept(qout,label)
 	if html is None:
 		fail += 1
 	else:

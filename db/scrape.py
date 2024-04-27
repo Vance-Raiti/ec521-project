@@ -6,6 +6,9 @@ import requests
 from urllib.parse import urlparse
 from tldextract import extract
 
+import whois
+from datetime import datetime
+
 LEGIT = 0
 PHISH = 1
 
@@ -50,6 +53,22 @@ def extract_top_k_words(tfidf_scores, k, feature_names):
     word_scores = list(zip(feature_names, tfidf_scores))
     sorted_words = sorted(word_scores, key=lambda x: x[1], reverse=True)
     return sorted_words[:k]
+
+
+def ageofdomain(html,url):
+    try:
+        domain_info = whois.whois(url)
+        creation_date = domain_info.creation_date
+        if isinstance(creation_date, list):
+            creation_date = creation_date[0]
+    	current_date = datetime.now()
+    	age = current_date - creation_date
+    	return age.days
+
+    except Exception as e:
+        print("Error:", e)
+        return None
+
 
 def debug(*args,**kwargs):
 	if DEBUG:

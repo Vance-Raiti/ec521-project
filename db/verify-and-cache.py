@@ -9,8 +9,8 @@ import sys
 from os.path import exists, join, dirname
 
 
-NUM_WORKERS = 256
-TARGET_SIZE = 10000
+NUM_WORKERS = 1
+TARGET_SIZE = 10
 qin, qout = mp.Queue(), mp.Queue()
 
 
@@ -55,10 +55,10 @@ if not exists('save'):
 i = 0
 save_path = lambda i: f'save/successfully-scraped-{i}'
 
-while exist(save_path(i)):
+while exists(save_path(i)):
 	i += 1
 
-scraped = open(save_path(i))
+scraped = open(save_path(i),'w')
 
 for i in range(len(urls)):
 	url, html, _, __ = accept(qout,label)

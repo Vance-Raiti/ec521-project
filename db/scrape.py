@@ -19,6 +19,8 @@ headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleW
 html_cache = open("html_cache.txt","a")
 html_cache_table = open("html_cache_table.csv","a")
 
+api_key = open(".api-key").read().strip()
+
 def get_page_rank(domains):
 	api_key = ''
 	url = 'https://openpagerank.com/api/v1.0/getPageRank'
@@ -30,11 +32,13 @@ def get_page_rank(domains):
 	else:
 		data = ''
 	return data
+
 def extract_text_from_webpage(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    for script in soup(["script", "style"]):
-        script.extract()
-    return soup.get_text()
+	soup = BeautifulSoup(html, 'html.parser')
+	for script in soup(["script", "style"]):
+		script.extract()
+	return soup.get_text()
+
 def ResultsFromDuckDuckGo(html,url):
 	k = 5
 	webpage_text = extract_text_from_webpage(html)
@@ -50,24 +54,24 @@ def ResultsFromDuckDuckGo(html,url):
 	return results
 
 def extract_top_k_words(tfidf_scores, k, feature_names):
-    word_scores = list(zip(feature_names, tfidf_scores))
-    sorted_words = sorted(word_scores, key=lambda x: x[1], reverse=True)
-    return sorted_words[:k]
+	word_scores = list(zip(feature_names, tfidf_scores))
+	sorted_words = sorted(word_scores, key=lambda x: x[1], reverse=True)
+	return sorted_words[:k]
 
 
 def ageofdomain(html,url):
-    try:
-        domain_info = whois.whois(url)
-        creation_date = domain_info.creation_date
-        if isinstance(creation_date, list):
-            creation_date = creation_date[0]
-    	current_date = datetime.now()
-    	age = current_date - creation_date
-    	return age.days
+	try:
+		domain_info = whois.whois(url)
+		creation_date = domain_info.creation_date
+		if isinstance(creation_date, list):
+			creation_date = creation_date[0]
+		current_date = datetime.now()
+		age = current_date - creation_date
+		return age.days
 
-    except Exception as e:
-        print("Error:", e)
-        return None
+	except Exception as e:
+		print("Error:", e)
+		return None
 
 
 def debug(*args,**kwargs):
@@ -102,10 +106,13 @@ def accept(qout,label):
 	url, html, pagerank, ducksearch = qout.get()
 	if html is None:
 		return url, html
-	offset = html_cache.tell()
+
+	html_offset = html_cache.tell()
 	print(html,file=html_cache)
+	duck_offset = html_cache.tell()
+	print(ducksearch,file=html_cache)
 	
-	print(f"{url},{offset},{len(html)},{label}",file=html_cache_table)
+	print(f"{url},{html_offset},{len(html)},{label},{pagerank}",file=html_cache_table)
 	return url, html
 
 def retrieve(row):

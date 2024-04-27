@@ -3,3 +3,4 @@ env
 **/html_cache.txt
 **/html_cache_table.csv
 **/scrap
+**/.api-key

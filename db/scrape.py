@@ -68,20 +68,19 @@ def scrape_(qin,qout):
 			exit()
 		try:
 			html = requests.get(url,headers=headers,timeout=5).text
-			#domain = extract(url).registered_domain
-			#domains = [domain]
-			#pagerank = get_page_rank(domains)
-			#ducksearch = ResultsFromDuckDuckGo(html,url)
+			domain = extract(url).registered_domain
+			domains = [domain]
+			pagerank = get_page_rank(domains)
+			ducksearch = ResultsFromDuckDuckGo(html,url)
 			debug(f'SUCCESS {url}')
 		except requests.exceptions.RequestException:
 			html = None
 			debug(f'FAILED  {url}')
 		qout.put((url,html))
-		#qout.put((url,html,pagerank,ducksearch))
+		qout.put((url,html,pagerank,ducksearch))
 
 def accept(qout,label):
-	url,html = qout.get()
-	#url, html,pagerank,ducksearch = qout.get()
+	url, html, pagerank, ducksearch = qout.get()
 	if html is None:
 		return url, html
 	offset = html_cache.tell()

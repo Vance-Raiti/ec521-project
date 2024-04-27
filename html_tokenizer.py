@@ -22,7 +22,7 @@ class HtmlTokenizer:
 		self.tokenizer = Tokenizer.from_file('html-tokenizer.json')
 
 	def train_tokenizer(self):
-		html = HtmlDataset(length = 7000)
+		html = HtmlDataset(length = 3500)
 		tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
 		tokenizer.pre_tokenizer = Whitespace()
 		trainer = BpeTrainer(vocab_size=VOCAB_SIZE,special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"])
@@ -30,8 +30,7 @@ class HtmlTokenizer:
 		tokenizer.save("html-tokenizer.json")
 
 	def encode(self,html):
-		text = html2text(html)
-		text = str(text.encode('ascii','ignore'))
+		text = str(html.encode('ascii','ignore'))
 		ids = self.tokenizer.encode(html).ids
 		x = [0 for _ in range(VOCAB_SIZE)]
 		for i in ids:

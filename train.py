@@ -1,6 +1,6 @@
 import torch
 
-from datasets import WebFeaturesDataset
+from datasets import PreprocessedDataset
 from model import MultiLayerPerceptron
 import url_features
 from html_tokenizer import HtmlTokenizer
@@ -8,20 +8,14 @@ from html_tokenizer import HtmlTokenizer
 N_EPOCHS = 3
 EPS = 1e-7
 
-html_tokenizer = HtmlTokenizer()
 
-feature_functions = [
-	url_features.get_features,
-	html_tokenizer,
-]
-
-data = WebFeaturesDataset(feature_functions=feature_functions)
+data = PreprocessedDataset()
 for x,y in data:
 	in_features = x.shape[0]
 	break
 net = MultiLayerPerceptron(in_features=in_features)
 loss_fn = torch.nn.BCELoss()
-optimizer = torch.optim.SGD(net.parameters())
+optimizer = torch.optim.SGD(net.parameters(),lr=1e-4)
 
 class Evaluator():
 	def __init__(self):
@@ -49,11 +43,11 @@ class Evaluator():
 			else:
 				self.TN += 1
 		
-		print(f"\taccuracy: {self.correct/(self.i+EPS):.2}\n\
-		\tTP: {self.TP/(self.P+EPS):.2}\n\
-		\tFP: {self.FP/(self.P+EPS):.2}\n\
-		\tTN: {self.TN/(self.N+EPS):.2}\n\
-		\tFN: {self.FN/(self.N+EPS):.2}\n")
+		print(f"accuracy: {self.correct/(self.i+EPS):.2}\n\
+\tTP: {self.TP/(self.P+EPS):.2}\
+\tFP: {self.FP/(self.P+EPS):.2}\
+\tTN: {self.TN/(self.N+EPS):.2}\
+\tFN: {self.FN/(self.N+EPS):.2}")
 
 
 
@@ -68,12 +62,11 @@ for epoch in range(N_EPOCHS):
 		
 		pred_phish = y_hat.item() > 0.5
 		is_phish = y.item() > 0.5
-		print(f"Epoch {epoch}, it {i} of {len(data)}")
-		print(f"predictied {round(y_hat.item(),2)} (actual {round(y.item())})")
+		print(f"Epoch {epoch}, it {i} of {len(data)}. Predictied {round(y_hat.item(),2)} (actual {round(y.item())})")
 		evaluator.update(pred_phish,is_phish)
 	
 	with torch.no_grad():
-		data.valid()
+		data.test()
 		evaluator = Evaluator()	
 		for i,(x,y) in enumerate(data):
 			y_hat = net(x)

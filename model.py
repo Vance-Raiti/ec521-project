@@ -1,7 +1,7 @@
 import torch
 
 class MultiLayerPerceptron(torch.nn.Module):
-	def __init__(self,in_features=15, width=20, depth=3):
+	def __init__(self,in_features=15, width=200, depth=4):
 		super().__init__()
 		self.layers = torch.nn.Sequential(*[
 			torch.nn.Linear(in_features,width),

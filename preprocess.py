@@ -4,7 +4,8 @@ import torch
 import url_features
 import sys
 from html_tokenizer import HtmlTokenizer
-from test import SearchDuckDuck
+#from test import SearchDuckDuck
+import test
 RANGE = 2000
 
 start = int(sys.argv[1])
@@ -14,7 +15,7 @@ html_tokenizer = HtmlTokenizer()
 feature_functions = [
 	url_features.get_features,
 	html_tokenizer,
-	SearchDuckDuck,
+	test.SearchDuckDuck,
 ]
 
 

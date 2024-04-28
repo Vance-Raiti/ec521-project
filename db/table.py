@@ -5,6 +5,10 @@ from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urlparse
 from tldextract import extract
+from nltk.corpus import words
+import nltk
+
+nltk.download('words')
 
 def extract_text_from_webpage(html):
     soup = BeautifulSoup(html, 'html.parser')
@@ -28,33 +32,54 @@ def retrieve_html(url):
         print("Exception occurred while retrieving HTML:", e)
         return "Nothing"
 
+english_vocab = set(words.words())
+
 def main(url):
-    k = 5
+    k = 5  
     html = retrieve_html(url)
     if html:
         webpage_text = extract_text_from_webpage(html)
-        if webpage_text == "Nothing":
+        if not webpage_text.strip():  # Check if webpage_text is empty or contains only whitespace
+            print("Webpage text is empty")
             return "Nothing"
-        tfidf_vectorizer = TfidfVectorizer()
-        tfidf_matrix = tfidf_vectorizer.fit_transform([webpage_text])
-        tfidf_scores = tfidf_matrix.toarray()[0]
-        feature_names = tfidf_vectorizer.get_feature_names_out()
-        top_k_words = extract_top_k_words(tfidf_scores, k, feature_names)
+        
+        english_words = [word for word in webpage_text.split() if word.lower() in english_vocab]
+        webpage_text = ' '.join(english_words)
+        
+        if webpage_text.strip():
+            try:
+                tfidf_vectorizer = TfidfVectorizer()
+                tfidf_matrix = tfidf_vectorizer.fit_transform([webpage_text])
+            except ValueError:
+                print("Empty vocabulary encountered, returning 'Nothing'")
+                return "Nothing"
+            
+            if tfidf_vectorizer.vocabulary_:
+                tfidf_scores = tfidf_matrix.toarray()[0]
+                feature_names = tfidf_vectorizer.get_feature_names_out()
+                top_k_words = extract_top_k_words(tfidf_scores, k, feature_names)
 
-        domain = extract(url).domain
+                domain = extract(url).domain
 
-        query = " ".join(word for word, _ in top_k_words)
-        query += f" {domain}"
+                query = " ".join(word for word, _ in top_k_words)
+                query += f" {domain}"
 
-        try:
-            with DDGS(timeout=5) as ddgs:  # Set a timeout of 5 seconds for the DDGS request
-                results = ddgs.text(query, max_results=30)
-        except requests.Timeout:
-            print("DuckDuckGo search request timed out")
-            results = "Nothing"
-        return results
+                try:
+                    with DDGS(timeout=5) as ddgs:  
+                        results = ddgs.text(query, max_results=30)
+                except requests.Timeout:
+                    print("DuckDuckGo search request timed out")
+                    results = "Nothing"
+                except Exception as e:
+                    print("An error occurred during DuckDuckGo search:", e)
+                    results = "Nothing"
+                return results
+            else:
+                print("Webpage text contains only stop words")
+                return "Nothing"
     else:
         return "Nothing"
+
 
 # Path to the input text file containing URLs
 input_txt_path = 'legit-urls.txt'
@@ -66,17 +91,17 @@ def process_urls(input_file, output_file):
         writer = csv.writer(f)
         writer.writerow(['url', 'duckduckgo_search_result'])  # Write header row
 
-        with open(input_file, 'r') as input_file:
+        with open(input_file, 'r', encoding='utf-8') as input_file:  # Specify encoding
             for line in input_file:
                 url = line.strip()
                 # Call the main function to get the DuckDuckGo search results
-                print('beforehi')
+                print('Processing URL:', url)
                 results = main(url)
-                print('hi')
                 # Write the URL and DuckDuckGo search result to the output CSV file
                 writer.writerow([url, results])
 
 # Process URLs synchronously
 process_urls(input_txt_path, output_csv_path)
+
 
 print("Results saved to:", output_csv_path)

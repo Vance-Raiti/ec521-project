@@ -1,14 +1,16 @@
 import csv
-from duckduckgo_search import AsyncDDGS
+from duckduckgo_search import DDGS
 from sklearn.feature_extraction.text import TfidfVectorizer
 from bs4 import BeautifulSoup
-import aiohttp
-import asyncio
+import requests
 from urllib.parse import urlparse
 from tldextract import extract
-import aiofiles
+from nltk.corpus import words
+import nltk
 
-async def extract_text_from_webpage(html):
+nltk.download('words')
+
+def extract_text_from_webpage(html):
     soup = BeautifulSoup(html, 'html.parser')
     for script in soup(["script", "style"]):
         script.extract()
@@ -19,27 +21,34 @@ def extract_top_k_words(tfidf_scores, k, feature_names):
     sorted_words = sorted(word_scores, key=lambda x: x[1], reverse=True)
     return sorted_words[:k]
 
-async def retrieve_html(url):
+def retrieve_html(url):
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    return await response.text()
-                else:
-                    return None
-    except aiohttp.ClientError as e:
+        response = requests.get(url, timeout=3)  # Set a timeout of 10 seconds for the entire request
+        if response.status_code == 200:
+            return response.text
+        else:
+            return "Nothing"
+    except requests.RequestException as e:
         print("Exception occurred while retrieving HTML:", e)
-        return None
+        return "Nothing"
+english_vocab = set(words.words())
 
-async def main(url):
-    k = 5
-    html = await retrieve_html(url)
+def main(url):
+    k = 5  
+    html = retrieve_html(url)
     if html:
-        webpage_text = await extract_text_from_webpage(html)
-        if webpage_text and len(webpage_text) > 10:  # Adjust the minimum length threshold as needed
+        webpage_text = extract_text_from_webpage(html)
+        if webpage_text == "Nothing":
+            return "Nothing"
+        
+        english_words = [word for word in webpage_text.split() if word.lower() in english_vocab]
+        webpage_text = ' '.join(english_words)
+        
+        if webpage_text.strip():
             tfidf_vectorizer = TfidfVectorizer()
             tfidf_matrix = tfidf_vectorizer.fit_transform([webpage_text])
-            if tfidf_vectorizer.vocabulary_:  # Check if vocabulary is not empty
+            
+            if tfidf_vectorizer.vocabulary_:
                 tfidf_scores = tfidf_matrix.toarray()[0]
                 feature_names = tfidf_vectorizer.get_feature_names_out()
                 top_k_words = extract_top_k_words(tfidf_scores, k, feature_names)
@@ -49,15 +58,21 @@ async def main(url):
                 query = " ".join(word for word, _ in top_k_words)
                 query += f" {domain}"
 
-                async with AsyncDDGS() as ddgs:
-                    try:
-                        # Set a timeout of 10 seconds for the ddgs.text function
-                        results = await asyncio.wait_for(ddgs.text(query, max_results=30), timeout=10)
-                    except asyncio.TimeoutError:
-                        # If the function exceeds the timeout, return "Nothing"
-                        results = "Nothing"
+                try:
+                    with DDGS(timeout=5) as ddgs:  
+                        results = ddgs.text(query, max_results=30)
+                except requests.Timeout:
+                    print("DuckDuckGo search request timed out")
+                    results = "Nothing"
+                except Exception as e:
+                    print("An error occurred during DuckDuckGo search:", e)
+                    results = "Nothing"
                 return results
+            else:
+                print("Webpage text contains only stop words")
+                return "Nothing"
         else:
+            print("Webpage text is empty")
             return "Nothing"
     else:
         return "Nothing"
@@ -68,21 +83,22 @@ input_txt_path = 'phish-urls.txt'
 # Path to the output CSV file where results will be saved
 output_csv_path = 'resultsPhish.csv'
 
-async def process_urls(input_file, output_file):
-    async with aiofiles.open(output_file, 'w', newline='', encoding='utf-8') as f:
+def process_urls(input_file, output_file):
+    with open(output_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        await writer.writerow(['url', 'duckduckgo_search_result'])  # Write header row
+        writer.writerow(['url', 'duckduckgo_search_result'])  # Write header row
 
-        async with aiofiles.open(input_file, 'r') as input_file:
-            async for line in input_file:
+        with open(input_file, 'r', encoding='utf-8') as input_file:  # Specify encoding
+            for line in input_file:
                 url = line.strip()
                 # Call the main function to get the DuckDuckGo search results
-                results = await main(url)
-                
+                print('Processing URL:', url)
+                results = main(url)
                 # Write the URL and DuckDuckGo search result to the output CSV file
-                await writer.writerow([url, results])
+                writer.writerow([url, results])
 
-# Run the asyncio event loop
-asyncio.run(process_urls(input_txt_path, output_csv_path))
+# Process URLs synchronously
+process_urls(input_txt_path, output_csv_path)
+
 
 print("Results saved to:", output_csv_path)

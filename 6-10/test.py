@@ -8,7 +8,7 @@ def main(Godaddyresult, SearchRankResult,url):
     original_domain = extract(url).registered_domain
     TArray = []
     Number11 = 1
-    if SearchRankResult == "":
+    if SearchRankResult == '':
         TArray.append(1)
     else:
         TArray.append(0)

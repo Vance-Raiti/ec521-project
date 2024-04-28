@@ -67,14 +67,16 @@ def main(Godaddyresult, SearchRankResult,url):
     original_domain = extract(url).registered_domain
     TArray = []
     Number11 = 1
+    if SearchRankResult == "":
+        TArray.append(1)
+    else:
+        TArray.append(0)
     for result in Godaddyresult:
         result_domain = extract(result['href']).registered_domain
         if result_domain == original_domain:
             Number11 = 0
             break
     TArray.append(Number11)
-    # domain = extract(url).registered_domain
-    # domains = [domain]
     TArray.append(SearchRankResult)
     return TArray
 

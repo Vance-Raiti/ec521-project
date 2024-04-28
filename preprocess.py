@@ -6,6 +6,7 @@ import sys
 from html_tokenizer import HtmlTokenizer
 #from test import SearchDuckDuck
 import test
+import Scrapy
 RANGE = 2000
 
 start = int(sys.argv[1])
@@ -16,6 +17,7 @@ feature_functions = [
 	url_features.get_features,
 	html_tokenizer,
 	test.SearchDuckDuck,
+	Scrapy.main
 ]
 
 

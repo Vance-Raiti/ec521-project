@@ -51,4 +51,3 @@ transformers==4.40.0
 triton==2.2.0
 typing_extensions==4.11.0
 urllib3==2.2.1
-whois==1.20240129.2

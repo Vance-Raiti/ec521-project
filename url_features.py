@@ -25,47 +25,9 @@ top_level_domains = [
 	"mil",
 ]
 
-def get_features(html,url):
-	protocol, domain = parse("{}://{}",url)
-	if domain[-1] == "/":
-		domain = domain[:-1]
-	if "/" in domain:
-		domain,path = parse("{}/{}",domain)
-	else:
-		path = ""
-
+def get_features(html,url,*args):
 	features = []
-
-	# does this url contain something that looks like a domain in the path?
-	features.append(
-		1 if embedded_domain.match(path) is not None else 0
-	)
-
-	# does this url con
-	features.append(
-		1 if ipv4_address.match(url) is not None else 0
-	)
-
-	features.append(
-		url.count('.')
-	)
-
-	# decided to split feature 4 into 2 separate features
-	features.append(
-		1 if "@" in url else 0
-	)
-
-	features.append(
-		1 if "-" in domain else 0
-	)
-
 	features.append(
 		token_classifier(url)
-	)
-	
-	features.append(
-		1 if any([
-			segment in top_level_domains for segment in url.split('.')[3:]
-		]) else 0
 	)
 	return features

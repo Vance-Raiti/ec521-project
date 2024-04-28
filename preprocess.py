@@ -21,10 +21,12 @@ feature_functions = [
 def process(data):
 	features = []
 	html = data['html']
+	ddg = data['ddg']
+	page_rank = data['page_rank']
 	url = data['url']
 	label = data['label']
 	for fn in feature_functions:
-		features += fn(html,url)
+		features += fn(html,url,ddg,page_rank)
 	features += [label]
 	return features
 
@@ -42,3 +44,4 @@ for i in range(start,stop):
 	features = process(data)
 	consume(features)
 	print(f"{i:5} of {len(dataset)}")
+print(start,stop)

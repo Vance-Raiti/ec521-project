@@ -9,8 +9,8 @@ import sys
 from os.path import exists, join, dirname
 
 
-NUM_WORKERS = 1
-TARGET_SIZE = 10
+NUM_WORKERS = 256
+TARGET_SIZE = 10000
 qin, qout = mp.Queue(), mp.Queue()
 
 
@@ -61,7 +61,7 @@ while exists(save_path(i)):
 scraped = open(save_path(i),'w')
 
 for i in range(len(urls)):
-	url, html, _, _ = accept(qout,label)
+	url, html  = accept(qout,label)
 	if html is None:
 		fail += 1
 	else:

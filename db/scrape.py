@@ -9,12 +9,11 @@ from tldextract import extract
 import whois
 from datetime import datetime
 
-from ddgs import ddgs_test
 
 LEGIT = 0
 PHISH = 1
 
-DEBUG = True
+DEBUG = False
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
@@ -24,16 +23,15 @@ html_cache_table = open("html_cache_table.csv","a")
 api_key = open(".api-key").read().strip()
 
 def get_page_rank(domains):
-	api_key = ''
 	url = 'https://openpagerank.com/api/v1.0/getPageRank'
 	headers = {'API-OPR': api_key}
 	params = {'domains[]': domains}
 	response = requests.get(url, headers=headers, params=params)
 	if response.status_code == 200:
-		data = response.json()
+		return response.json()
 	else:
-		data = ''
-	return data
+		print('WARNING: pagerank failed')
+		raise requests.exceptions.RequestException
 
 def extract_text_from_webpage(html):
 	soup = BeautifulSoup(html, 'html.parser')
@@ -67,13 +65,13 @@ def ageofdomain(html,url):
 		creation_date = domain_info.creation_date
 		if isinstance(creation_date, list):
 			creation_date = creation_date[0]
-		current_date = datetime.now()
-		age = current_date - creation_date
-		return age.days
-
-	except Exception as e:
-		print("Error:", e)
-		return None
+		if creation_date is None or type(creation_date) is str:
+			creation_date = datetime.now()
+	except Exception:
+		creation_date = datetime.now()	
+	current_date = datetime.now()
+	age = current_date - creation_date
+	return age.days
 
 
 def debug(*args,**kwargs):
@@ -88,7 +86,6 @@ def scrape(*args,**kwargs):
 
 def scrape_(qin,qout):
 	while qin.qsize():	
-		results = ddgs_test()
 		url = qin.get()
 		if url == "END":
 			exit()
@@ -97,26 +94,24 @@ def scrape_(qin,qout):
 			domain = extract(url).registered_domain
 			domains = [domain]
 			pagerank = get_page_rank(domains)
+			age = ageofdomain(html,url)
 			debug(f'SUCCESS {url}')
 		except requests.exceptions.RequestException:
 			html = None
 			pagerank = None
+			age = None
 			debug(f'FAILED  {url}')
-		print('done')
-		qout.put((url,html))
-		qout.put((url,html,pagerank,ducksearch))
+		qout.put((url,html,pagerank,age))
 
 def accept(qout,label):
-	url, html, pagerank, ducksearch = qout.get()
+	url, html, pagerank, age = qout.get()
 	if html is None:
 		return url, html
-
 	html_offset = html_cache.tell()
-	print(html,file=html_cache)
-	duck_offset = html_cache.tell()
-	print(ducksearch,file=html_cache)
-	
-	print(f"{url},{html_offset},{len(html)},{label},{pagerank}",file=html_cache_table)
+	print(html,file=html_cache)	
+	page_rank_offset = html_cache.tell()
+	print(pagerank,file=html_cache)
+	print(f"{url},{html_offset},{len(html)},{page_rank_offset},{len(pagerank)},{age},{label}",file=html_cache_table)
 	return url, html
 
 def retrieve(row):

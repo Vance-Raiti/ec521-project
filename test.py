@@ -5,7 +5,7 @@ import requests
 from urllib.parse import urlparse
 from tldextract import extract
 
-def SearchDuckDuck(html,url,ddg,page_rank):
+def SearchDuckDuck(html,url,ddg,page_rank,age):
     
     original_domain = extract(url).registered_domain
     TArray = []

@@ -80,7 +80,6 @@ def main(url):
     else:
         return "Nothing"
 
-
 # Path to the input text file containing URLs
 input_txt_path = 'legit-urls.txt'
 # Path to the output CSV file where results will be saved
@@ -99,9 +98,9 @@ def process_urls(input_file, output_file):
                 results = main(url)
                 # Write the URL and DuckDuckGo search result to the output CSV file
                 writer.writerow([url, results])
+if __name__ == "__main__":
+	# Process URLs synchronously
+	process_urls(input_txt_path, output_csv_path)
 
-# Process URLs synchronously
-process_urls(input_txt_path, output_csv_path)
 
-
-print("Results saved to:", output_csv_path)
+	print("Results saved to:", output_csv_path)

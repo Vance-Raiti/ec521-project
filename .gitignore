@@ -1,6 +1,7 @@
 __pycache__
 env
 cache
+cache.tar.gz
 **/html_cache.txt
 **/html_cache_table.csv
 **/scrap

@@ -91,14 +91,15 @@ class GenericDataset:
 		
 		fp.seek(d['page_rank_offset'])
 		page_rank = fp.read(d['page_rank_len'])
-		return html, ddg, page_rank
+		age = d['age']
+		return html, ddg, page_rank, age
 
 	def __len__(self):
 		return len(self.data)
 
 	def __getitem__(self,idx):
 		d = self.data[idx]
-		d['html'], d['ddg'], d['page_rank'] = self.retrieve(d)
+		d['html'], d['ddg'], d['page_rank'], d['age'] = self.retrieve(d)
 		return d
 	
 	def __iter__(self):

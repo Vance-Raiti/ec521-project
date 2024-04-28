@@ -37,7 +37,7 @@ class HtmlTokenizer:
 			x[i] = 1
 		return x
 	
-	def __call__(self, html, url):
+	def __call__(self, html, url,*args):
 		x = self.encode(html)
 		return x
 

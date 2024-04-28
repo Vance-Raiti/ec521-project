@@ -20,7 +20,7 @@ DEFAULT_LEGITIMATE = join(this,'db/legit')
 DEFAULT_PHISH = join(this,'db/phish')
 i = 0
 
-class GenericDataset(IterableDataset):
+class GenericDataset:
 	def __init__(
 			self,
 			feature_functions=None,
@@ -34,42 +34,42 @@ class GenericDataset(IterableDataset):
 		self.feature_functions = feature_functions
 		html_cache_of = lambda prefix: join(prefix,"cache/html_cache.txt")
 		html_cache_table_of = lambda prefix: join(prefix,"cache/html_cache_table.csv")
-		def parse_row(row,label):
-			row = row.strip().split(',') + [label]
-			labels = ['url','offset','len','label']
-			types = [str,int,int,float]
+		def parse_row(row):
+			row = row.strip().split(',')
+			labels = [
+				'url',
+				'html_offset','html_len',
+				'page_rank_offset','page_rank_len',
+				'age',
+				'label',
+				'ddg_offset','ddg_len'
+			]
+			types = [
+				str,
+				int,int,
+				int,int,
+				int,
+				float,
+				int,int
+			]
 			if len(row) != len(labels):
 				return None
 			d = {k:t(v) for k,v,t in zip(labels,row,types)}
 			if len(d['url']) == 0:
 				return None
 			return d
-		PHISH = 1
-		LEGIT = 0	
-		if use_eps:
-			PHISH -= EPS
-			LEGIT += EPS
 
-		legit = [
-			parse_row(row,LEGIT)
-			for row in open(html_cache_table_of(legit_path))
+		data = [
+			parse_row(row)
+			for row in open('cache/cache_table.csv')
 		]
-		self.legit_cache = open(html_cache_of(legit_path))
-		phish = [
-			parse_row(row,PHISH)
-			for row in open(html_cache_table_of(phish_path))
-		]
-		self.phish_cache = open(html_cache_of(phish_path))
-		
-		data = phish + legit
-		data = [d for d in data if d is not None]
-		
+		self.cache = open('cache/cache.txt')
+
 		shuffle(data)
 		split = int(len(data)*valid_split)
 		self.valid_data = data[:split]
 		self.train_data = data[split:]
 		self.data = self.train_data
-		self.feature_functions = feature_functions
 	
 	def train(self):
 		self.data = self.train_data
@@ -81,41 +81,30 @@ class GenericDataset(IterableDataset):
 		self.data = self.train_data + self.valid_data
 
 	def retrieve(self,d):
-		if d['label'] > 0.5:
-			fp = self.phish_cache
-		else:
-			fp = self.legit_cache
-		fp.seek(d['offset'])
-		html = fp.read(d['len'])
-		return html
+		fp = self.cache
+	
+		fp.seek(d['html_offset'])
+		html = fp.read(d['html_len'])
+		
+		fp.seek(d['ddg_offset'])
+		ddg = fp.read(d['ddg_len'])
+		
+		fp.seek(d['page_rank_offset'])
+		page_rank = fp.read(d['page_rank_len'])
+		return html, ddg, page_rank
 
 	def __len__(self):
 		return len(self.data)
 
 	def __getitem__(self,idx):
 		d = self.data[idx]
-		d['html'] = self.retrieve(d)
+		d['html'], d['ddg'], d['page_rank'] = self.retrieve(d)
 		return d
 	
 	def __iter__(self):
 		for i in range(len(self)):
 			yield self[i]
 
-class WebFeaturesDataset(GenericDataset):
-	def __iter__(self):
-		for d in self.data:
-			if d['url'] == '' or 'label' not in d:
-				continue
-
-			html = self.retrieve(d)
-			features = []
-			for fn in self.feature_functions:
-				features += fn(html,d['url'])
-			
-			try:
-				yield torch.tensor(features,dtype=torch.float), torch.tensor([d['label']],dtype=torch.float)
-			except KeyError:
-				continue
 
 class PreprocessedDataset:
 	def __init__(self):

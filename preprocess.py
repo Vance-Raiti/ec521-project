@@ -36,9 +36,9 @@ def consume(features):
 	print(','.join(features),file=output)	
 		
 dataset = GenericDataset()
+dataset.train_and_valid()
 stop = min(start+RANGE,len(dataset))
 
-dataset.train_and_valid()
 for i in range(start,stop):
 	data = dataset[i]
 	features = process(data)
